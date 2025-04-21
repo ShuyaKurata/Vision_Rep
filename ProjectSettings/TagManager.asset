@@ -3,15 +3,16 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - DamagingSphere
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - ARPlanes
   - Water
   - UI
-  - 
+  - ARWall
   - 
   - 
   - 
