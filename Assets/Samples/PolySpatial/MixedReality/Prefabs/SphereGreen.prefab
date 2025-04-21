@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4525964457759740008}
   - component: {fileID: 5211680067486177328}
   - component: {fileID: -900225979750428081}
-  - component: {fileID: -7120316660893811138}
+  - component: {fileID: -73648786307096160}
   m_Layer: 0
   m_Name: SphereGreen
   m_TagString: DamagingSphere
@@ -134,7 +134,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &-7120316660893811138
+--- !u!114 &-73648786307096160
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143,10 +143,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 5059253293926411632}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5179e5eba3cf2433bb57072ce419ed25, type: 3}
+  m_Script: {fileID: 11500000, guid: 69d0fddb7b2a446c396e5dc908709762, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holeMarkerPrefab: {fileID: 1893695148121217393, guid: d5ee308311698447a897c1381a7ac5cb,
-    type: 3}
-  wallTag: ARPlanes
-  holeOffset: 0.01
+  m_DestructionObjectTag: Enemy

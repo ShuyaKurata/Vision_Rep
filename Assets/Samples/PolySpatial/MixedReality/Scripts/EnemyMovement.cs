@@ -2,7 +2,8 @@
 using UnityEngine;
 using UnityEngine.AI; // NavMeshAgent を使うために必要
 using UnityEngine.XR;
-
+using TMPro;
+using UnityEngine.UI;
 
 // NavMeshAgentコンポーネントがアタッチされていることを保証
 [RequireComponent(typeof(NavMeshAgent))]
@@ -32,6 +33,17 @@ public class EnemyMovement : MonoBehaviour
     NavMeshAgent m_Agent; // NavMeshAgentへの参照
     Rigidbody m_Rigidbody; // Rigidbodyへの参照
     bool m_IsInitialized = false;
+
+    [SerializeField]
+    public int hp = 3;
+    [SerializeField]
+    public int maxHp = 3;
+    [SerializeField] 
+    private TextMeshPro hpText; // ← TextMeshPro（3Dのやつ）を参照
+     [SerializeField] 
+    private Slider slider;
+
+
 
     void Awake()
     {
@@ -85,6 +97,8 @@ public class EnemyMovement : MonoBehaviour
         // NavMeshAgentのパラメータを設定
         ApplyAgentSettings();
 
+        UpdateHPText();
+
         m_IsInitialized = true;
         Debug.Log("Enemy Initialized.", this);
     }
@@ -105,16 +119,16 @@ public class EnemyMovement : MonoBehaviour
 
         // 初期化済みで、追跡対象があり、AgentがNavMesh上で有効な場合
         if (m_IsInitialized && m_PlayerTransform != null && m_Agent.isActiveAndEnabled && m_Agent.isOnNavMesh)
-{
-    Vector3 targetPos = m_PlayerTransform.position;
+        {
+            Vector3 targetPos = m_PlayerTransform.position;
 
-    NavMeshHit hit;
-    // 地面のNavMesh上に「近い位置」があるか探す（半径2.0f以内）
-    if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
-    {
-        m_Agent.SetDestination(hit.position); // ← NavMesh上の位置にスナップして渡す
-    }
-}
+            NavMeshHit hit;
+            // 地面のNavMesh上に「近い位置」があるか探す（半径2.0f以内）
+            if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
+            {
+                m_Agent.SetDestination(hit.position); // ← NavMesh上の位置にスナップして渡す
+            }
+        }
 
         else if (m_IsInitialized && m_Agent.isActiveAndEnabled && !m_Agent.isOnNavMesh)
         {
@@ -126,16 +140,16 @@ public class EnemyMovement : MonoBehaviour
 
     }
 
-    // --- 衝突処理 ---
-    void OnCollisionEnter(Collision collision)
-    {
-        // 衝突した相手のゲームオブジェクトが指定されたタグを持っているか確認
-        if (!string.IsNullOrEmpty(m_DestructionObjectTag) && collision.gameObject.CompareTag(m_DestructionObjectTag))
-        {
-            // このエネミーオブジェクトを破壊する
-            DestroyEnemy();
-        }
-    }
+    // // --- 衝突処理 ---
+    // void OnCollisionEnter(Collision collision)
+    // {
+    //     // 衝突した相手のゲームオブジェクトが指定されたタグを持っているか確認
+    //     if (!string.IsNullOrEmpty(m_DestructionObjectTag) && collision.gameObject.CompareTag(m_DestructionObjectTag))
+    //     {
+    //         // このエネミーオブジェクトを破壊する
+    //         DestroyEnemy();
+    //     }
+    // }
 
     // 敵を破壊する処理
     void DestroyEnemy()
@@ -170,5 +184,24 @@ public class EnemyMovement : MonoBehaviour
             m_Agent.speed = m_MoveSpeed;
             m_Agent.angularSpeed = m_RotationSpeed;
         }
+    }
+
+
+    public void TakeDamage(int amount) {
+        hp -= amount;
+        UpdateHPText();
+        if (hp <= 0) {
+            Destroy(gameObject); // HPが尽きたら自分が壊れる
+        }
+    }
+
+    private void UpdateHPText()
+    {
+        if (hpText != null)
+        {
+            hpText.text = $"HP: {hp}";
+        }
+
+        slider.value = (float)hp / (float)maxHp; ;
     }
 }
