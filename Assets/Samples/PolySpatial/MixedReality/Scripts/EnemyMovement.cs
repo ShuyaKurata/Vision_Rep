@@ -34,6 +34,7 @@ public class EnemyMovement : MonoBehaviour
     Rigidbody m_Rigidbody; // Rigidbodyへの参照
     bool m_IsInitialized = false;
 
+    [Header("テキスト")]
     [SerializeField]
     public int hp = 3;
     [SerializeField]
@@ -42,6 +43,10 @@ public class EnemyMovement : MonoBehaviour
     private TextMeshPro hpText; // ← TextMeshPro（3Dのやつ）を参照
      [SerializeField] 
     private Slider slider;
+
+    [Header("ドロップ")]
+     [SerializeField] 
+    private GameObject dropItem;
 
 
 
@@ -105,17 +110,7 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
-            Debug.Log("un");
-            Debug.Log(m_PlayerTransform.position);
-            Debug.Log(Camera.main.transform.position);
-        //     InputDevice device = InputDevices.GetDeviceAtXRNode(XRNode.CenterEye);
-
-        // if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 headPos))
-        // {
-        //     Debug.Log("頭の位置: " + headPos);
-        // }
-
-            Debug.Log("komasi");
+           
 
         // 初期化済みで、追跡対象があり、AgentがNavMesh上で有効な場合
         if (m_IsInitialized && m_PlayerTransform != null && m_Agent.isActiveAndEnabled && m_Agent.isOnNavMesh)
@@ -191,6 +186,8 @@ public class EnemyMovement : MonoBehaviour
         hp -= amount;
         UpdateHPText();
         if (hp <= 0) {
+           Instantiate(dropItem, this.transform.position, this.transform.rotation);
+
             Destroy(gameObject); // HPが尽きたら自分が壊れる
         }
     }
