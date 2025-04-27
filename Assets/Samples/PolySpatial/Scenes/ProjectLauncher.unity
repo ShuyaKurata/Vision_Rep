@@ -1400,8 +1400,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 696b042f926564713a7de4b359524e58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LevelName: CharacterWalker
-  m_LevelType: 0
+  m_LevelName: SampleScene
+  m_LevelType: 11
 --- !u!114 &426081082
 MonoBehaviour:
   m_ObjectHideFlags: 0

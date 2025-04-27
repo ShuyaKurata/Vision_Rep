@@ -16,7 +16,8 @@ namespace PolySpatial.Samples
             SwiftUI,
             Meshing,
             UGUI,
-            Portal
+            Portal,
+            SampleScene
         }
 
         const string CharacterNavigationTitle = "Character Navigation";

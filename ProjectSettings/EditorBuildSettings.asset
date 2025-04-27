@@ -14,6 +14,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Samples/PolySpatial/Scenes/CharacterWalker.unity
     guid: ac4639d906f05074eab3cd0068afbf9b
+  - enabled: 0
+    path: Assets/Scenes/SampleScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
   m_configObjects:
     UnityEditor.XR.VisionOS.VisionOSSettings: {fileID: 11400000, guid: cee5ab00d0b884871b25d1523bc34f81,
       type: 2}

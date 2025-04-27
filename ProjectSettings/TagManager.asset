@@ -6,6 +6,8 @@ TagManager:
   tags:
   - DamagingSphere
   - Enemy
+  - PolySpatialCamera
+  - BackgroundCube
   layers:
   - Default
   - TransparentFX

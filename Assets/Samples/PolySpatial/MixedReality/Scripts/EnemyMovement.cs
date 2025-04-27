@@ -4,6 +4,7 @@ using UnityEngine.AI; // NavMeshAgent を使うために必要
 using UnityEngine.XR;
 using TMPro;
 using UnityEngine.UI;
+using System.Collections;
 
 // NavMeshAgentコンポーネントがアタッチされていることを保証
 [RequireComponent(typeof(NavMeshAgent))]
@@ -47,6 +48,14 @@ public class EnemyMovement : MonoBehaviour
     [Header("ドロップ")]
      [SerializeField] 
     private GameObject dropItem;
+
+    [Header("アニメーション")]
+    [SerializeField] private Animator animator; // Animator参照
+    [SerializeField] private float attackInterval = 2f; // 攻撃間隔
+    [SerializeField] private float attackRange = 1.5f; // 攻撃範囲
+
+    private float attackTimer = 0f;
+    private bool isDead = false;
 
 
 
@@ -110,21 +119,52 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
-           
 
-        // 初期化済みで、追跡対象があり、AgentがNavMesh上で有効な場合
-        if (m_IsInitialized && m_PlayerTransform != null && m_Agent.isActiveAndEnabled && m_Agent.isOnNavMesh)
+
+            if (m_IsInitialized && m_PlayerTransform != null && m_Agent.isActiveAndEnabled && m_Agent.isOnNavMesh)
         {
-            Vector3 targetPos = m_PlayerTransform.position;
+           // 元のワールド座標
+            Vector3 a = transform.position;
+            Vector3 b = m_PlayerTransform.position;
 
-            NavMeshHit hit;
-            // 地面のNavMesh上に「近い位置」があるか探す（半径2.0f以内）
-            if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
+            // Y を 0 に
+            a.y = 0f;
+            b.y = 0f;
+
+            // 水平距離だけを計算
+            float distance = Vector3.Distance(a, b);
+            Debug.Log($"distance={distance}");
+
+            if (distance > m_StoppingDistance)
             {
-                m_Agent.SetDestination(hit.position); // ← NavMesh上の位置にスナップして渡す
+                // 移動中
+                animator.SetBool("isMoving", true);
+                animator.SetBool("isAttacking", false);
+                animator.SetBool("isIdle", false);
+
+                Vector3 targetPos = m_PlayerTransform.position;
+                NavMeshHit hit;
+
+                if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
+                {
+                    m_Agent.SetDestination(hit.position);
+                }
+            }
+            else
+            {
+                // プレイヤーに到達 → 待機 or 攻撃
+                animator.SetBool("isMoving", false);
+                animator.SetBool("isIdle", true);
+
+                attackTimer += Time.deltaTime;
+                if (attackTimer >= attackInterval)
+                {
+                    attackTimer = 0f;
+                    animator.SetTrigger("Attack"); // 攻撃モーション1回だけ
+                    AttackPlayerIfInRange();
+                }
             }
         }
-
         else if (m_IsInitialized && m_Agent.isActiveAndEnabled && !m_Agent.isOnNavMesh)
         {
              // Debug.LogWarning("Enemy is not on NavMesh. Waiting for NavMesh generation or repositioning.", this);
@@ -145,6 +185,16 @@ public class EnemyMovement : MonoBehaviour
     //         DestroyEnemy();
     //     }
     // }
+
+    void AttackPlayerIfInRange()
+    {
+        float distance = Vector3.Distance(transform.position, m_PlayerTransform.position);
+        if (distance <= attackRange)
+        {
+            Debug.Log("攻撃ヒット！プレイヤーにダメージを与える");
+            GameManager.Instance.ReducePlayerHP(1); // GameManagerにダメージ処理を依頼
+        }
+    }
 
     // 敵を破壊する処理
     void DestroyEnemy()
@@ -182,14 +232,32 @@ public class EnemyMovement : MonoBehaviour
     }
 
 
-    public void TakeDamage(int amount) {
+    public void TakeDamage(int amount)
+    {
+        if (isDead) return;
+
         hp -= amount;
         UpdateHPText();
-        if (hp <= 0) {
-           Instantiate(dropItem, this.transform.position, this.transform.rotation);
-
-            Destroy(gameObject); // HPが尽きたら自分が壊れる
+        if (hp <= 0)
+        {
+            StartCoroutine(Die());
         }
+    }
+
+    IEnumerator Die()
+    {
+        isDead = true;
+        m_Agent.isStopped = true; // NavMesh止める
+        animator.SetBool("isDead", true); // 死亡モーション再生
+        Debug.Log("敵死亡");
+
+        // ドロップアイテム生成
+        Instantiate(dropItem, transform.position, transform.rotation);
+
+        // 死亡モーションの長さだけ待ってから削除
+        yield return new WaitForSeconds(3f); // 3秒くらい待つ、ここはアニメの長さ次第で調整
+
+        Destroy(gameObject);
     }
 
     private void UpdateHPText()
