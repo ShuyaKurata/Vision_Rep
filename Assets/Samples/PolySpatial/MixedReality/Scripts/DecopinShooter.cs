@@ -102,12 +102,12 @@ void TryDecopin()
                 {
                     GameObject obj = Instantiate(m_SpawnPrefab, indexPos, Quaternion.identity);
 
-// 進行方向に力を加える
-Rigidbody rb = obj.GetComponent<Rigidbody>();
-if (rb != null)
-{
-    rb.velocity = velocity.normalized * m_ShotForce; // ← ここで速度方向に飛ばす
-}
+                    // 進行方向に力を加える
+                    Rigidbody rb = obj.GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        rb.velocity = velocity.normalized * m_ShotForce; // ← ここで速度方向に飛ばす
+                    }
 
                     m_HasFired = true;
                     m_IsAiming = false;

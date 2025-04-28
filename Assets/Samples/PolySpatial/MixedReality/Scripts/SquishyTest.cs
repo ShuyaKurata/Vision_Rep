@@ -38,12 +38,28 @@ namespace PolySpatial.Samples
                 Debug.LogWarning("PolySpatialCameraが見つからない！");
             }
 
-            // backgroundCubeも同じくタグで探すか、名前で探す
-            backgroundCube = GameObject.FindWithTag("BackgroundCube");
-            if (backgroundCube == null)
+            GameObject[] allObjects = Resources.FindObjectsOfTypeAll<GameObject>();
+            GameObject _backgroundCube = null;
+
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.CompareTag("BackgroundCube"))
+                {
+                    _backgroundCube = obj;
+                    break;
+                }
+            }
+
+            if (_backgroundCube == null)
             {
                 Debug.LogWarning("BackgroundCubeが見つからない！");
             }
+            else
+            {
+                Debug.Log("BackgroundCubeが見つかった！");
+            }
+
+            backgroundCube = _backgroundCube;
             GetHandSubsystem();
             m_ScaledThreshold = k_PinchThreshold /m_PolySpatialCameraTransform.localScale.x; // カメラスケールに基づくスレッショルドの調整
         }
@@ -58,21 +74,23 @@ namespace PolySpatial.Samples
             if ((updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.RightHandRootPose) != 0)
             {
                 // assign joint values
-                m_RightIndexTipJoint = m_HandSubsystem.rightHand.GetJoint(XRHandJointID.IndexTip);
-                m_RightThumbTipJoint = m_HandSubsystem.rightHand.GetJoint(XRHandJointID.ThumbTip);
+                // m_RightIndexTipJoint = m_HandSubsystem.rightHand.GetJoint(XRHandJointID.IndexTip);
+                // m_RightThumbTipJoint = m_HandSubsystem.rightHand.GetJoint(XRHandJointID.ThumbTip);
 
                 // Update the grip amount based on the pinch distance
-                UpdateGripAmount(m_RightIndexTipJoint, m_RightThumbTipJoint);
+                // UpdateGripAmount(m_RightIndexTipJoint, m_RightThumbTipJoint);
+                 UpdateGripAmount(m_HandSubsystem.rightHand);
             }
 
             if ((updateSuccessFlags & XRHandSubsystem.UpdateSuccessFlags.LeftHandRootPose) != 0)
             {
                 // assign joint values
-                m_LeftIndexTipJoint = m_HandSubsystem.leftHand.GetJoint(XRHandJointID.IndexTip);
-                m_LeftThumbTipJoint = m_HandSubsystem.leftHand.GetJoint(XRHandJointID.ThumbTip);
+                // m_LeftIndexTipJoint = m_HandSubsystem.leftHand.GetJoint(XRHandJointID.IndexTip);
+                // m_LeftThumbTipJoint = m_HandSubsystem.leftHand.GetJoint(XRHandJointID.ThumbTip);
 
                 // Update the grip amount based on the pinch distance
-                UpdateGripAmount(m_LeftIndexTipJoint, m_LeftThumbTipJoint);
+                // UpdateGripAmount(m_LeftIndexTipJoint, m_LeftThumbTipJoint);
+                UpdateGripAmount(m_HandSubsystem.leftHand);
             }
         }
 
@@ -113,52 +131,178 @@ namespace PolySpatial.Samples
             return true;
         }
 
-        // 手の握り具合に基づいてgripAmountを更新するメソッド
-        void UpdateGripAmount(XRHandJoint index, XRHandJoint thumb)
-        {
+        // // 手の握り具合に基づいてgripAmountを更新するメソッド
+        // void UpdateGripAmount(XRHandJoint index, XRHandJoint thumb)
+        // {
 
-            if (index.trackingState != XRHandJointTrackingState.None &&
-                thumb.trackingState != XRHandJointTrackingState.None)
-            {
+        //     if (index.trackingState != XRHandJointTrackingState.None &&
+        //         thumb.trackingState != XRHandJointTrackingState.None)
+        //     {
             
-                    // ヒットしたオブジェクトのmaterial.gripAmountを調整
-                    Renderer renderer = target.GetComponent<Renderer>();
-                    Vector3 indexPOS = Vector3.zero;
-                    Vector3 thumbPOS = Vector3.zero;
+        //             // ヒットしたオブジェクトのmaterial.gripAmountを調整
+        //             Renderer renderer = target.GetComponent<Renderer>();
+        //             Vector3 indexPOS = Vector3.zero;
+        //             Vector3 thumbPOS = Vector3.zero;
 
-                        if (index.TryGetPose(out Pose indexPose))
-                    {
-                        // adjust transform relative to the PolySpatial Camera transform
-                        indexPOS = m_PolySpatialCameraTransform.InverseTransformPoint(indexPose.position);
-                    }
+        //                 if (index.TryGetPose(out Pose indexPose))
+        //             {
+        //                 // adjust transform relative to the PolySpatial Camera transform
+        //                 indexPOS = m_PolySpatialCameraTransform.InverseTransformPoint(indexPose.position);
+        //             }
 
-                    if (thumb.TryGetPose(out Pose thumbPose))
-                    {
-                        // adjust transform relative to the PolySpatial Camera adjustments
-                        thumbPOS = m_PolySpatialCameraTransform.InverseTransformPoint(thumbPose.position);
-                    }
-                    if (renderer != null)
-                    {
-                        float distance = Vector3.Distance(indexPOS, thumbPOS);
-                        float gripAmount = 1.0f - Mathf.Clamp01(distance / k_PinchThreshold);
+        //             if (thumb.TryGetPose(out Pose thumbPose))
+        //             {
+        //                 // adjust transform relative to the PolySpatial Camera adjustments
+        //                 thumbPOS = m_PolySpatialCameraTransform.InverseTransformPoint(thumbPose.position);
+        //             }
+        //             if (renderer != null)
+        //             {
+        //                 float distance = Vector3.Distance(indexPOS, thumbPOS);
+        //                 float gripAmount = 1.0f - Mathf.Clamp01(distance / k_PinchThreshold);
 
-                        Material material = renderer.material;
+        //                 Material material = renderer.material;
 
-                        if (material.HasProperty("_GripAmount")) // 物体にGripAmountのプロパティがあるかチェック
-                        {
-                            material.SetFloat("_GripAmount", gripAmount); // gripAmountを設定
-                        }
-                        Debug.Log($"Pinch Distance: {distance} | Grip Amount: {gripAmount}");
+        //                 if (material.HasProperty("_GripAmount")) // 物体にGripAmountのプロパティがあるかチェック
+        //                 {
+        //                     material.SetFloat("_GripAmount", gripAmount); // gripAmountを設定
+        //                 }
+        //                 Debug.Log($"Pinch Distance: {distance} | Grip Amount: {gripAmount}");
 
-                        // Mathf.Approximately でほぼ同値を判定
-                        if (gripAmount >0.5)
-                        {
-                            DestroySphere();
-                        }
-                    }
+        //                 // Mathf.Approximately でほぼ同値を判定
+        //                 if (gripAmount >0.5)
+        //                 {
+        //                     DestroySphere();
+        //                 }
+        //             }
 
-            }
-        }
+        //     }
+        // }
+
+
+        bool isReadyToGrip = false; // 最初はfalse、パーでtrueになる
+        const float k_GripThreshold = 0.1f; // ここ追加！
+
+        // void UpdateGripAmount(XRHand hand)
+        // {
+        //     if (hand == null || hand.GetJoint(XRHandJointID.Palm).trackingState == XRHandJointTrackingState.None)
+        //         return;
+
+        //     XRHandJoint palm = hand.GetJoint(XRHandJointID.Palm);
+        //     Vector3 palmPos = Vector3.zero;
+
+        //     if (palm.TryGetPose(out Pose palmPose))
+        //     {
+        //         palmPos = m_PolySpatialCameraTransform.InverseTransformPoint(palmPose.position);
+        //     }
+        //     else
+        //     {
+        //         // pose取れなかった時の処理（必要なら）
+        //         Debug.LogWarning("Palm pose not available.");
+        //         return; // pose取れないならここで処理をスキップしてもOK
+        //     }
+
+        //     float totalDistance = 0f;
+        //     int fingerCount = 0;
+
+        //     XRHandJointID[] fingerTips = {
+        //         XRHandJointID.IndexTip,
+        //         XRHandJointID.MiddleTip,
+        //         XRHandJointID.RingTip,
+        //         XRHandJointID.LittleTip
+        //     };
+
+        //     foreach (var fingerTipID in fingerTips)
+        //     {
+        //         XRHandJoint fingerTip = hand.GetJoint(fingerTipID);
+
+        //         if (fingerTip.trackingState != XRHandJointTrackingState.None && fingerTip.TryGetPose(out Pose fingerPose))
+        //         {
+        //             Vector3 fingerPos = m_PolySpatialCameraTransform.InverseTransformPoint(fingerPose.position);
+        //             float distance = Vector3.Distance(fingerPos, palmPos);
+        //             totalDistance += distance;
+        //             fingerCount++;
+        //         }
+        //     }
+
+        //     if (fingerCount > 0)
+        //     {
+        //         float averageDistance = totalDistance / fingerCount;
+        //         float gripAmount = 1.0f - Mathf.Clamp01(averageDistance / k_GripThreshold);
+
+                
+        //         Debug.Log($"Average Finger Distance: {averageDistance} | Grip Amount: {gripAmount}");
+
+        //         // 手首とオブジェクトの距離チェック
+        //         XRHandJoint wrist = hand.GetJoint(XRHandJointID.Wrist);
+        //         float wristToObjectDistance = 0f;
+
+        //         if (wrist.trackingState != XRHandJointTrackingState.None && wrist.TryGetPose(out Pose wristPose))
+        //         {
+        //             Vector3 wristPos = m_PolySpatialCameraTransform.InverseTransformPoint(wristPose.position);
+        //             wristToObjectDistance = Vector3.Distance(wristPos, target.transform.position);
+        //         }
+
+        //         // ここでパー状態を検出（gripAmountが小さいとき）
+        //         if (wristToObjectDistance < 0.3f)
+        //         {
+        //             if (gripAmount < 0.2f ){
+        //             isReadyToGrip = true;
+        //             }
+        //         }else{
+        //             isReadyToGrip = false;
+        //         }
+                
+
+
+        //         // グーで、パー状態を経由して、手首も近づいてたらOK
+        //         if ( isReadyToGrip)
+        //         {
+        //             Renderer renderer = target.GetComponent<Renderer>();
+        //             if (renderer != null && renderer.material.HasProperty("_GripAmount"))
+        //             {
+        //                 renderer.material.SetFloat("_GripAmount", gripAmount);
+        //             }
+        //             if(gripAmount > 0.8f ){
+        //                 DestroySphere();
+        //             }
+
+                    
+        //             // isReadyToGrip = false; // 一度グリップが成立したらリセット
+        //         }
+        //     }
+        // }
+
+        void UpdateGripAmount(XRHand hand)
+{
+    if (hand == null )
+    {
+        Debug.LogWarning("Hand is not tracked.");
+        return;
+    }
+
+    XRHandJoint palm = hand.GetJoint(XRHandJointID.Palm);
+    if (palm.trackingState == XRHandJointTrackingState.None)
+    {
+        Debug.LogWarning("Palm joint is not tracked.");
+        return;
+    }
+    if(palm == null){
+        Debug.Log("whre is palm!");
+    }
+
+    if (palm.TryGetPose(out Pose palmPose))
+    {
+        Vector3 palmPos = m_PolySpatialCameraTransform.InverseTransformPoint(palmPose.position);
+        // ここで palmPos を使用した処理を行う
+    }
+    else
+    {
+        Debug.LogWarning("Palm pose not available.");
+    }
+    Debug.Log("unkoburiburi");
+}
+
+
 
         public void DestroySphere()
         {

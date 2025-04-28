@@ -5,8 +5,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    public int playerHP = 10;
-    public int maxPlayerHP = 10;
+    public int playerHP = 5;
+    public int maxPlayerHP = 5;
 
     void Awake()
     {
@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     public void ReducePlayerHP(int amount)
     {
         playerHP -= amount;
+        Debug.Log("痛いー");
         if (playerHP <= 0)
         {
             playerHP = 0;

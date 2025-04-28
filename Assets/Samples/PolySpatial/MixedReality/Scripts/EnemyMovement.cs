@@ -56,6 +56,7 @@ public class EnemyMovement : MonoBehaviour
 
     private float attackTimer = 0f;
     private bool isDead = false;
+    // private bool isAttacking = false;
 
 
 
@@ -135,43 +136,56 @@ public class EnemyMovement : MonoBehaviour
             float distance = Vector3.Distance(a, b);
             Debug.Log($"distance={distance}");
 
-            if (distance > m_StoppingDistance)
-            {
-                // 移動中
-                animator.SetBool("isMoving", true);
-                animator.SetBool("isAttacking", false);
-                animator.SetBool("isIdle", false);
-
-                Vector3 targetPos = m_PlayerTransform.position;
-                NavMeshHit hit;
-
-                if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
+            if( !isDead) {
+                if (distance > m_StoppingDistance)
                 {
-                    m_Agent.SetDestination(hit.position);
+                    
+                    // 移動中
+                    animator.SetBool("isMoving", true);
+                    animator.SetBool("Attackable", false);
+                    animator.SetBool("isIdle", false);
+
+                    Vector3 targetPos = m_PlayerTransform.position;
+                    NavMeshHit hit;
+
+                    if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
+                    {
+                        m_Agent.SetDestination(hit.position);
+                    }
                 }
-            }
-            else
-            {
-                // プレイヤーに到達 → 待機 or 攻撃
-                animator.SetBool("isMoving", false);
-                animator.SetBool("isIdle", true);
-
-                attackTimer += Time.deltaTime;
-                if (attackTimer >= attackInterval)
+                else
                 {
-                    attackTimer = 0f;
-                    animator.SetTrigger("Attack"); // 攻撃モーション1回だけ
-                    AttackPlayerIfInRange();
+                        // プレイヤーに到達 → 待機 or 攻撃
+                        animator.SetBool("isMoving", false);
+                        animator.SetBool("isIdle", true);
+                        animator.SetBool("Attackable", true);
+
+                        // attackTimer += Time.deltaTime;
+                        // if (attackTimer >= attackInterval)
+                        // {
+                        //     attackTimer = 0f;
+                        //     animator.SetTrigger("Attack"); // 攻撃モーション1回だけ
+                        //     AttackPlayerIfInRange();
+
+                        //     isAttacking = true;
+                        // }
                 }
             }
         }
         else if (m_IsInitialized && m_Agent.isActiveAndEnabled && !m_Agent.isOnNavMesh)
         {
+            Debug.Log("i can 't move now");
              // Debug.LogWarning("Enemy is not on NavMesh. Waiting for NavMesh generation or repositioning.", this);
              // 必要に応じてNavMeshに最も近い点を探して移動させるなどの処理を追加することもできる
              // NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 1.0f, NavMesh.AllAreas);
              // if(hit.hit) m_Agent.Warp(hit.position);
         }
+
+                    // AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                    // if (isAttacking && stateInfo.IsTag("Attack") && stateInfo.normalizedTime >= 1f)
+                    // {
+                    //     isAttacking = false; // 攻撃終わったら解除
+                    // }
 
     }
 
@@ -194,16 +208,10 @@ public class EnemyMovement : MonoBehaviour
             Debug.Log("攻撃ヒット！プレイヤーにダメージを与える");
             GameManager.Instance.ReducePlayerHP(1); // GameManagerにダメージ処理を依頼
         }
+        
     }
 
-    // 敵を破壊する処理
-    void DestroyEnemy()
-    {
-        Debug.Log($"Enemy destroyed by object with tag '{m_DestructionObjectTag}'.", this);
-        // 必要であれば破壊エフェクトの生成などをここで行う
-        // 例: Instantiate(destructionEffectPrefab, transform.position, Quaternion.identity);
-        Destroy(gameObject);
-    }
+    
 
     // --- Inspectorでの設定値の動的反映（任意）---
     void OnValidate()
