@@ -108,7 +108,6 @@ public class EnemyMovement : MonoBehaviour
         // try { UnityEditor.TagManager.CheckTag(m_DestructionObjectTag); } // Editor専用
         // catch { Debug.LogError($"EnemyMovement: Tag '{m_DestructionObjectTag}' is not defined in the Tag Manager.", this); }
 
-
         // NavMeshAgentのパラメータを設定
         ApplyAgentSettings();
 
@@ -136,7 +135,7 @@ public class EnemyMovement : MonoBehaviour
             float distance = Vector3.Distance(a, b);
             Debug.Log($"distance={distance}");
 
-            if( !isDead) {
+            if(!isDead) {
                 if (distance > m_StoppingDistance)
                 {
                     
@@ -160,6 +159,8 @@ public class EnemyMovement : MonoBehaviour
                         animator.SetBool("isIdle", true);
                         animator.SetBool("Attackable", true);
 
+
+                        
                         // attackTimer += Time.deltaTime;
                         // if (attackTimer >= attackInterval)
                         // {
@@ -182,9 +183,9 @@ public class EnemyMovement : MonoBehaviour
         }
 
                     // AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-                    // if (isAttacking && stateInfo.IsTag("Attack") && stateInfo.normalizedTime >= 1f)
+                    // if (stateInfo.IsTag("Attack") && stateInfo.normalizedTime >= 1f)
                     // {
-                    //     isAttacking = false; // 攻撃終わったら解除
+                    //     AttackPlayerIfInRange();
                     // }
 
     }
@@ -260,7 +261,9 @@ public class EnemyMovement : MonoBehaviour
         Debug.Log("敵死亡");
 
         // ドロップアイテム生成
-        Instantiate(dropItem, transform.position, transform.rotation);
+        Vector3 spawnPos = transform.position + new Vector3(0f, 1.0f, 0f);
+        Instantiate(dropItem, spawnPos, transform.rotation);
+
 
         // 死亡モーションの長さだけ待ってから削除
         yield return new WaitForSeconds(3f); // 3秒くらい待つ、ここはアニメの長さ次第で調整

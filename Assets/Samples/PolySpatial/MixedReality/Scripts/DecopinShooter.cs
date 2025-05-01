@@ -40,6 +40,13 @@ float m_ShotForce = 3f; // 発射の強さ（適宜調整）
 Vector3 m_PreviousIndexPos;
 bool m_HasPreviousIndexPos = false;
 
+         private bool objCreated = false;
+        private GameObject obj;
+        float duration = 2.0f; // スケーリングにかける時間（秒）
+        Vector3 startScale = Vector3.zero;
+        Vector3 targetScale = Vector3.one * 0.3f;
+        float elapsedTime = 0f;
+
         void Start()
         {
             GetHandSubsystem();
@@ -87,33 +94,82 @@ void TryDecopin()
 
         m_PreviousThumbIndexDelta = delta;
 
-        // ここで速度を計算
+        // // ここで速度を計算
+        // if (m_IsAiming && !m_HasFired && m_HasPreviousIndexPos)
+        // {
+        //     Vector3 velocity = (indexPos - m_PreviousIndexPos) / Time.deltaTime;
+        //     float speed = velocity.magnitude;
+
+        //     if (m_Wrist.TryGetPose(out Pose wristPose) && m_Palm.TryGetPose(out Pose palmPose))
+        //     {
+        //         Vector3 handForward = (palmPose.position - wristPose.position).normalized;
+        //         float dot = Vector3.Dot(velocity.normalized, handForward);
+
+        //         if (speed > k_SpeedThreshold && dot > k_DirectionThreshold)
+        //         {
+        //             GameObject obj = Instantiate(m_SpawnPrefab, indexPos, Quaternion.identity);
+
+        //             // 進行方向に力を加える
+        //             Rigidbody rb = obj.GetComponent<Rigidbody>();
+        //             if (rb != null)
+        //             {
+        //                 rb.velocity = velocity.normalized * m_ShotForce; // ← ここで速度方向に飛ばす
+        //             }
+
+        //             m_HasFired = true;
+        //             m_IsAiming = false;
+        //         }
+        //     }
+        // }
+
+
+
         if (m_IsAiming && !m_HasFired && m_HasPreviousIndexPos)
         {
             Vector3 velocity = (indexPos - m_PreviousIndexPos) / Time.deltaTime;
             float speed = velocity.magnitude;
 
-            if (m_Wrist.TryGetPose(out Pose wristPose) && m_Palm.TryGetPose(out Pose palmPose))
+            if (!objCreated)
             {
-                Vector3 handForward = (palmPose.position - wristPose.position).normalized;
-                float dot = Vector3.Dot(velocity.normalized, handForward);
+                obj = Instantiate(m_SpawnPrefab, indexPos, Quaternion.identity);
+                objCreated = true;
+            }
 
-                if (speed > k_SpeedThreshold && dot > k_DirectionThreshold)
+            if(obj != null){
+                obj.transform.position = indexPos;
+
+                if (elapsedTime < duration)
                 {
-                    GameObject obj = Instantiate(m_SpawnPrefab, indexPos, Quaternion.identity);
+                    elapsedTime += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsedTime / duration);
+                    obj.transform.localScale = Vector3.Lerp(startScale, targetScale, t);
+                }
 
-                    // 進行方向に力を加える
-                    Rigidbody rb = obj.GetComponent<Rigidbody>();
-                    if (rb != null)
+                if (m_Wrist.TryGetPose(out Pose wristPose) && m_Palm.TryGetPose(out Pose palmPose))
+                {
+                    Vector3 handForward = (palmPose.position - wristPose.position).normalized;
+                    float dot = Vector3.Dot(velocity.normalized, handForward);
+
+                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold)
                     {
-                        rb.velocity = velocity.normalized * m_ShotForce; // ← ここで速度方向に飛ばす
-                    }
+                        Rigidbody rb = null;
+                        if (obj != null)
+                        {
+                            rb = obj.GetComponent<Rigidbody>();
+                        }
+                        if (rb != null)
+                        {
+                            rb.velocity = velocity.normalized * m_ShotForce;
+                        }
 
-                    m_HasFired = true;
-                    m_IsAiming = false;
+
+                        m_HasFired = true;
+                        m_IsAiming = false;
+                    }
                 }
             }
         }
+
 
         m_PreviousIndexPos = indexPos;
         m_HasPreviousIndexPos = true;
@@ -121,6 +177,10 @@ void TryDecopin()
         if (distance > m_ScaledThreshold * 1.2f)
         {
             m_IsAiming = false;
+        }
+        if(!m_IsAiming){
+            objCreated = false;
+            elapsedTime = 0;
         }
     }
 }
