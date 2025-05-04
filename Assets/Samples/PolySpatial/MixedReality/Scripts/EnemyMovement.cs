@@ -21,7 +21,7 @@ public class EnemyMovement : MonoBehaviour
     float m_StoppingDistance = 0.5f; // プレイヤーにどれだけ近づいたら停止するか (Agentの設定と同期)
 
     [SerializeField]
-    float m_MoveSpeed = 3.5f; // NavMeshAgentの移動速度 (Agentの設定と同期)
+    float m_MoveSpeed = 1f; // NavMeshAgentの移動速度 (Agentの設定と同期)
 
     [SerializeField]
     float m_RotationSpeed = 120f; // NavMeshAgentの回転速度 (AgentのAngular Speedと同期)
@@ -56,7 +56,7 @@ public class EnemyMovement : MonoBehaviour
 
     private float attackTimer = 0f;
     private bool isDead = false;
-    // private bool isAttacking = false;
+    private bool isAttacking = false;
 
 
 
@@ -133,10 +133,10 @@ public class EnemyMovement : MonoBehaviour
 
             // 水平距離だけを計算
             float distance = Vector3.Distance(a, b);
-            Debug.Log($"distance={distance}");
+            // Debug.Log($"distance={distance}");
 
             if(!isDead) {
-                if (distance > m_StoppingDistance)
+                if (distance > m_StoppingDistance && !isAttacking)
                 {
                     
                     // 移動中
@@ -209,7 +209,12 @@ public class EnemyMovement : MonoBehaviour
             Debug.Log("攻撃ヒット！プレイヤーにダメージを与える");
             GameManager.Instance.ReducePlayerHP(1); // GameManagerにダメージ処理を依頼
         }
+         isAttacking = false;
         
+    }
+
+    void StartAttackCallBack(){
+        isAttacking = true;
     }
 
     

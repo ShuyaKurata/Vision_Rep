@@ -6,6 +6,7 @@ public class GreenSphere : MonoBehaviour
 {
      [SerializeField]
     string m_DestructionObjectTag = "Enemy"; // 衝突時に破壊されるオブジェクトのタグ
+    public bool Fired = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,20 +22,21 @@ public class GreenSphere : MonoBehaviour
    // --- 衝突処理 ---
 void OnCollisionEnter(Collision collision)
 {
-    // 衝突した相手のゲームオブジェクトが指定されたタグを持っているか確認
-    if (!string.IsNullOrEmpty(m_DestructionObjectTag) && collision.gameObject.CompareTag(m_DestructionObjectTag))
-    {
-        // EnemyMovement.cs スクリプトを取得
-        EnemyMovement target = collision.gameObject.GetComponent<EnemyMovement>();
-
-        if (target != null)
+    if(Fired){
+        // 衝突した相手のゲームオブジェクトが指定されたタグを持っているか確認
+        if (!string.IsNullOrEmpty(m_DestructionObjectTag) && collision.gameObject.CompareTag(m_DestructionObjectTag))
         {
-            target.TakeDamage(1); // BのHPを1減らす
+            // EnemyMovement.cs スクリプトを取得
+            EnemyMovement target = collision.gameObject.GetComponent<EnemyMovement>();
+
+            if (target != null)
+            {
+                target.TakeDamage(1); // BのHPを1減らす
+            }
+
         }
-
+            Destroy(this.gameObject); // 自分（A）を破壊
     }
-        Destroy(this.gameObject); // 自分（A）を破壊
-
 }
 
 }

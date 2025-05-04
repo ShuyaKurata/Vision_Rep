@@ -15,7 +15,7 @@ namespace PolySpatial.Samples
         Transform m_PolySpatialCameraTransform;
 
         [SerializeField]
-float m_ShotForce = 3f; // 発射の強さ（適宜調整）
+float m_ShotForce = 10f; // 発射の強さ（適宜調整）
 
 
 #if UNITY_INCLUDE_XR_HANDS
@@ -44,7 +44,7 @@ bool m_HasPreviousIndexPos = false;
         private GameObject obj;
         float duration = 2.0f; // スケーリングにかける時間（秒）
         Vector3 startScale = Vector3.zero;
-        Vector3 targetScale = Vector3.one * 0.3f;
+        Vector3 targetScale = Vector3.one * 0.2f;
         float elapsedTime = 0f;
 
         void Start()
@@ -128,6 +128,7 @@ void TryDecopin()
         {
             Vector3 velocity = (indexPos - m_PreviousIndexPos) / Time.deltaTime;
             float speed = velocity.magnitude;
+            Debug.Log(speed);
 
             if (!objCreated)
             {
@@ -150,7 +151,7 @@ void TryDecopin()
                     Vector3 handForward = (palmPose.position - wristPose.position).normalized;
                     float dot = Vector3.Dot(velocity.normalized, handForward);
 
-                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold)
+                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f)
                     {
                         Rigidbody rb = null;
                         if (obj != null)
@@ -162,7 +163,8 @@ void TryDecopin()
                             rb.velocity = velocity.normalized * m_ShotForce;
                         }
 
-
+                        GreenSphere objScript = obj.GetComponent<GreenSphere>();
+                        objScript.Fired = true;
                         m_HasFired = true;
                         m_IsAiming = false;
                     }
@@ -174,10 +176,10 @@ void TryDecopin()
         m_PreviousIndexPos = indexPos;
         m_HasPreviousIndexPos = true;
 
-        if (distance > m_ScaledThreshold * 1.2f)
-        {
-            m_IsAiming = false;
-        }
+        // if (distance > m_ScaledThreshold * 1.2f)
+        // {
+        //     m_IsAiming = false;
+        // }
         if(!m_IsAiming){
             objCreated = false;
             elapsedTime = 0;

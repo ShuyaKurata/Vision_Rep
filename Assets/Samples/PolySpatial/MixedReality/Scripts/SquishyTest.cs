@@ -353,6 +353,10 @@ namespace PolySpatial.Samples
 
         private IEnumerator FadeClipTime()
         {
+            // レンダラーだけ無効化
+            var rend = GetComponent<Renderer>();
+            if (rend != null) rend.enabled = false;
+
             float startValue = targetMaterial.GetFloat("_ClipTime");
             float elapsed = 0f;
 

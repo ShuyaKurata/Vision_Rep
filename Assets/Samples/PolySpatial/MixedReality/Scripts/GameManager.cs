@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-   [SerializeField] private Image redScreenImage; // ← RedScreenのImageコンポーネントをアサイン
+   [SerializeField] private GameObject redScreen; // ← RedScreenのImageコンポーネントをアサイン
     private Material redScreenMaterial;
+     [SerializeField] 
+    private TextMeshPro playerHpText; // ← TextMeshPro（3Dのやつ）を参照
 
     public int playerHP = 5;
     public int maxPlayerHP = 5;
@@ -22,14 +25,14 @@ public class GameManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(this.gameObject);
         }
-        if (redScreenImage != null)
+        if (redScreen != null)
         {
             // 紐づいているMaterialを取得
-            redScreenMaterial = redScreenImage.material;
+            redScreenMaterial = redScreen.GetComponent<Renderer>().material;
         }
         else
         {
-            Debug.LogError("redScreenImage が設定されていません！");
+            Debug.LogError("redScreen が設定されていません！");
         }
     }
 
@@ -41,7 +44,11 @@ public class GameManager : MonoBehaviour
         StartCoroutine(FadeInOut(redScreenMaterial, "_alpha", 1f));
         StartCoroutine(FadeInOut(redScreenMaterial, "_hp", 0.5f));
         // redScreenMaterial.color = new Color(1f, 0f, 0f, 1f); // 赤、完全不透明
-      
+
+         if (playerHpText != null)
+        {
+            playerHpText.text = $"HP: {playerHP}";
+        }
 
 
         if (playerHP <= 0)
