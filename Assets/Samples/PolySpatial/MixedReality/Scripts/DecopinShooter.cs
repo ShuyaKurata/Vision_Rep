@@ -25,6 +25,10 @@ float m_ShotForce = 10f; // 発射の強さ（適宜調整）
         XRHandJoint m_Wrist;
         XRHandJoint m_Palm;
 
+        bool middleExtended;
+          bool ringExtended;  
+          bool pinkyExtended;
+
         Vector3 m_PreviousThumbIndexDelta;
         float m_PinchDistance;
         float m_ScaledThreshold;
@@ -67,6 +71,11 @@ bool m_HasPreviousIndexPos = false;
                 m_ThumbTip = hand.GetJoint(XRHandJointID.ThumbTip);
                 m_Wrist = hand.GetJoint(XRHandJointID.Wrist);
                 m_Palm = hand.GetJoint(XRHandJointID.MiddleMetacarpal); // Palm がなければ代用
+                
+                middleExtended = IsFingerExtended(hand, XRHandJointID.MiddleTip, XRHandJointID.MiddleMetacarpal);
+                ringExtended = IsFingerExtended(hand, XRHandJointID.RingTip, XRHandJointID.RingMetacarpal);
+                pinkyExtended = IsFingerExtended(hand, XRHandJointID.LittleTip, XRHandJointID.LittleMetacarpal);
+
 
                 TryDecopin();
             }
@@ -85,8 +94,10 @@ void TryDecopin()
         var delta = thumbPos - indexPos;
         var distance = delta.magnitude;
 
+       
         if (distance < m_ScaledThreshold &&
-            (delta - m_PreviousThumbIndexDelta).sqrMagnitude < k_AimingStabilityThreshold)
+            (delta - m_PreviousThumbIndexDelta).sqrMagnitude < k_AimingStabilityThreshold &&
+            middleExtended && ringExtended && pinkyExtended)
         {
             m_IsAiming = true;
             m_HasFired = false;
@@ -185,6 +196,27 @@ void TryDecopin()
             elapsedTime = 0;
         }
     }
+}
+
+
+bool IsFingerExtended(XRHand hand, XRHandJointID tipID, XRHandJointID metacarpalID)
+{
+    XRHandJoint tipJoint = hand.GetJoint(tipID);
+    XRHandJoint metacarpalJoint = hand.GetJoint(metacarpalID);
+
+    if (tipJoint.TryGetPose(out Pose tipPose) && metacarpalJoint.TryGetPose(out Pose metacarpalPose)&&m_Wrist.TryGetPose(out Pose wristPose) && m_Palm.TryGetPose(out Pose palmPose))
+    {
+        Vector3 fingerDirection = (tipPose.position - metacarpalPose.position).normalized;
+        Vector3 handForward = (palmPose.position - wristPose.position).normalized;
+
+        Debug.Log("tin");
+        Debug.Log(fingerDirection);
+        Debug.Log(handForward);
+
+        return Vector3.Dot(fingerDirection, handForward) > 0.9f;
+    }
+
+    return false;
 }
 
 

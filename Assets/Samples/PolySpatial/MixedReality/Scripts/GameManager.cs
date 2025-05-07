@@ -29,6 +29,8 @@ public class GameManager : MonoBehaviour
         {
             // 紐づいているMaterialを取得
             redScreenMaterial = redScreen.GetComponent<Renderer>().material;
+            redScreenMaterial.renderQueue = 9999; // 通常透明オブジェクトは 3000
+
         }
         else
         {
@@ -39,23 +41,33 @@ public class GameManager : MonoBehaviour
 
     public void ReducePlayerHP(int amount)
     {
-        playerHP -= amount;
-        Debug.Log("痛いー");
-        StartCoroutine(FadeInOut(redScreenMaterial, "_alpha", 1f));
-        StartCoroutine(FadeInOut(redScreenMaterial, "_hp", 0.5f));
-        // redScreenMaterial.color = new Color(1f, 0f, 0f, 1f); // 赤、完全不透明
-
-         if (playerHpText != null)
-        {
-            playerHpText.text = $"HP: {playerHP}";
-        }
+        
 
 
         if (playerHP <= 0)
         {
             playerHP = 0;
             Debug.Log("プレイヤー死亡！");
+            if (playerHpText != null)
+            {
+                playerHpText.text = "GAME OVER";
+            }
             // ゲームオーバー処理など
+            GameOver();
+        }else{
+            playerHP -= amount;
+            Debug.Log("痛いー");
+            // StartCoroutine(FadeInOut(redScreenMaterial, "_alpha", 2f));
+            // redScreen.transform.localScale *= 0.8f;
+            StartCoroutine(FadeInOut2(redScreenMaterial,  2f));
+            // StartCoroutine(FadeInOut(redScreenMaterial, "_hp", 0.5f));
+            // redScreenMaterial.SetFloat("_hp", playerHP+1);
+            // redScreenMaterial.color = new Color(1f, 0f, 0f, 1f); // 赤、完全不透明
+
+            if (playerHpText != null)
+            {
+                playerHpText.text = $"HP: {playerHP}";
+            }
         }
     }
 
@@ -67,7 +79,7 @@ public class GameManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             float t = timer / durationPerPhase;
-            float value = Mathf.Lerp(0f, 1f, t);
+            float value = Mathf.Lerp(0f, 0.8f, t);
             mat.SetFloat(property, value);
             yield return null;
         }
@@ -78,13 +90,66 @@ public class GameManager : MonoBehaviour
         {
             timer += Time.deltaTime;
             float t = timer / durationPerPhase;
-            float value = Mathf.Lerp(1f, 0f, t);
+            float value = Mathf.Lerp(0.8f, 0f, t);
             mat.SetFloat(property, value);
             yield return null;
         }
 
         // 最後に完全に0にセットして終了
         mat.SetFloat(property, 0f);
+    }
+
+    public IEnumerator FadeInOut2(Material mat, float durationPerPhase)
+    {
+        Color color = mat.color;
+        // フェードイン (0 → 1)
+        float timer = 0f;
+        while (timer < durationPerPhase)
+        {
+            timer += Time.deltaTime;
+            float t = timer / durationPerPhase;
+            float value = Mathf.Lerp(0f, 1.0f, t);
+            color.a = value; 
+            mat.color = color;
+            yield return null;
+        }
+
+        // フェードアウト (1 → 0)
+        timer = 0f;
+        while (timer < durationPerPhase)
+        {
+            timer += Time.deltaTime;
+            float t = timer / durationPerPhase;
+            float value = Mathf.Lerp(1.0f, 0f, t);
+            color.a = value; 
+            mat.color = color;
+            yield return null;
+        }
+
+        
+    }
+
+    public void GameClear(){
+        redScreen.SetActive(false);
+    }
+
+    public void GameOver()
+    {
+        Debug.Log("終わり");
+
+        // 赤画面を完全表示に
+        Color color = redScreenMaterial.color;
+        color.a = 1f;
+        redScreenMaterial.color = color;
+
+        // 1秒後にシーンを切り替える
+        StartCoroutine(LoadSceneAfterDelay());
+    }
+
+    private IEnumerator LoadSceneAfterDelay()
+    {
+        yield return new WaitForSeconds(1f); // 1秒待つ
+        SceneManager.LoadScene("ProjectLauncher");
     }
 
 

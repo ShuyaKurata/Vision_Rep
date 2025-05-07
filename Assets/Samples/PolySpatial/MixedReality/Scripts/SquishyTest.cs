@@ -17,6 +17,8 @@ namespace PolySpatial.Samples
         private GameObject backgroundCube;
         public Material targetMaterial; // 対象のマテリアル
         public float duration = 2.0f;    // フェードアウトにかける時間（秒）
+        [SerializeField]
+        private GameObject gameManager; 
 
 
 
@@ -51,6 +53,14 @@ namespace PolySpatial.Samples
                 if (obj.CompareTag("BackgroundCube"))
                 {
                     _backgroundCube = obj;
+                    break;
+                }
+            }
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.CompareTag("GameManager"))
+                {
+                    gameManager = obj;
                     break;
                 }
             }
@@ -271,7 +281,7 @@ namespace PolySpatial.Samples
                     {
                         renderer.material.SetFloat("_GripAmount", gripAmount);
                     }
-                    if (gripAmount > 0.5f)
+                    if (gripAmount > 0.4f)
                     {
                         gripHoldTimer += Time.deltaTime; // 毎フレーム、時間を足していく
                         if (gripHoldTimer >= requiredHoldTime)
@@ -359,6 +369,9 @@ namespace PolySpatial.Samples
 
             float startValue = targetMaterial.GetFloat("_ClipTime");
             float elapsed = 0f;
+
+            GameManager gameManagerSc = gameManager.GetComponent<GameManager>();
+            gameManagerSc.GameClear();
 
             while (elapsed < duration)
             {

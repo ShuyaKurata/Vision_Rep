@@ -149,11 +149,16 @@ public class EnemyMovement : MonoBehaviour
 
                     if (NavMesh.SamplePosition(targetPos, out hit, 2.0f, NavMesh.AllAreas))
                     {
+                        m_Agent.isStopped = false;
                         m_Agent.SetDestination(hit.position);
                     }
                 }
                 else
                 {
+
+                    m_Agent.isStopped = true;
+                    m_Agent.ResetPath();
+
                         // プレイヤーに到達 → 待機 or 攻撃
                         animator.SetBool("isMoving", false);
                         animator.SetBool("isIdle", true);
