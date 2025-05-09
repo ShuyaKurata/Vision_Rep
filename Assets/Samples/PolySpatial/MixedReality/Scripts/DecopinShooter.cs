@@ -152,7 +152,7 @@ void TryDecopin()
             if(obj != null){
                 obj.transform.position = indexPos;
                 // 回転
-                obj.transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
+                // obj.transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
 
                 if (elapsedTime < duration)
                 {
