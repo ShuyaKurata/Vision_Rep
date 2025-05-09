@@ -7,6 +7,8 @@ public class GreenSphere : MonoBehaviour
      [SerializeField]
     string m_DestructionObjectTag = "Enemy"; // 衝突時に破壊されるオブジェクトのタグ
     public bool Fired = false;
+
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -16,7 +18,7 @@ public class GreenSphere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+         
     }
 
    // --- 衝突処理 ---

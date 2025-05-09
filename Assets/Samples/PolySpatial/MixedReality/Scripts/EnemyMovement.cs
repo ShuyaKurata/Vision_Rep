@@ -271,8 +271,8 @@ public class EnemyMovement : MonoBehaviour
         Debug.Log("敵死亡");
 
         // ドロップアイテム生成
-        Vector3 spawnPos = transform.position + new Vector3(0f, 1.0f, 0f);
-        Instantiate(dropItem, spawnPos, transform.rotation);
+        // Vector3 spawnPos = transform.position + new Vector3(0f, 1.0f, 0f);
+        Instantiate(dropItem, transform.position, transform.rotation);
 
 
         // 死亡モーションの長さだけ待ってから削除

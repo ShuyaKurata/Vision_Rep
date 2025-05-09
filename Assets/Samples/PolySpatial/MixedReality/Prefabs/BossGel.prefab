@@ -137,3 +137,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 6233446999662516412}
+  targetMaterial: {fileID: 0}
+  duration: 2
+  gameManager: {fileID: 0}
+  riseSpeed: 0.5
+  riseDistance: 1
+  rotateSpeed: 90
+  destroyEffect: {fileID: 3514513916864004247, guid: 2cb79cb786a1947149bcc2ec5598cfea,
+    type: 3}
+  myClip: {fileID: 8300000, guid: 95f2b14ad651e454c9d37b2a8b87c1b3, type: 3}

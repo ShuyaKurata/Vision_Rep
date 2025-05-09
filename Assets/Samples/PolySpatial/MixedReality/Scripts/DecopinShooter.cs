@@ -17,6 +17,8 @@ namespace PolySpatial.Samples
         [SerializeField]
 float m_ShotForce = 10f; // 発射の強さ（適宜調整）
 
+         public float rotateSpeed = 0.1f; // 毎秒90度回転（Z軸回転なら Vector3.forward）
+
 
 #if UNITY_INCLUDE_XR_HANDS
         XRHandSubsystem m_HandSubsystem;
@@ -149,6 +151,8 @@ void TryDecopin()
 
             if(obj != null){
                 obj.transform.position = indexPos;
+                // 回転
+                obj.transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
 
                 if (elapsedTime < duration)
                 {
@@ -162,7 +166,7 @@ void TryDecopin()
                     Vector3 handForward = (palmPose.position - wristPose.position).normalized;
                     float dot = Vector3.Dot(velocity.normalized, handForward);
 
-                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f)
+                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f && elapsedTime > duration/4)
                     {
                         Rigidbody rb = null;
                         if (obj != null)

@@ -20,6 +20,19 @@ namespace PolySpatial.Samples
         [SerializeField]
         private GameObject gameManager; 
 
+        public float riseSpeed = 0.5f; // 上昇速度
+        public float riseDistance = 1f; // 上昇する最大距離
+
+        private Vector3 startPos;
+        public float rotateSpeed = 0.1f; // 毎秒90度回転（Z軸回転なら Vector3.forward）
+
+        [SerializeField] private ParticleSystem destroyEffect;
+
+
+        [SerializeField]
+    private AudioClip myClip;  // ← Inspectorから設定する
+
+    private AudioSource audio;
 
 
 #if UNITY_INCLUDE_XR_HANDS
@@ -34,6 +47,8 @@ namespace PolySpatial.Samples
 
         void Start()
         {
+            startPos = transform.position;
+
             // 1つしかないカメラのTransformを取得するならタグとか付けておくと安全
             GameObject cameraObj = GameObject.FindWithTag("PolySpatialCamera");
             if (cameraObj != null)
@@ -82,6 +97,14 @@ namespace PolySpatial.Samples
 
         void Update()
         {
+            // 経過距離がriseDistance未満なら上に動かす
+            if (Vector3.Distance(startPos, transform.position) < riseDistance)
+            {
+                transform.position += Vector3.up * riseSpeed * Time.deltaTime;
+            }
+            // 回転
+            transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
+
             if (!CheckHandSubsystem())
                 return;
 
@@ -341,6 +364,21 @@ namespace PolySpatial.Samples
 
         public void DestroySphere()
         {
+
+            // audio = gameObject.AddComponent<AudioSource>();
+            // audio.clip = myClip;
+            // audio.spatialBlend = 1f;        // 空間オーディオっぽくする
+            // audio.minDistance = 1f;         // 音量が減衰し始める距離
+            // audio.maxDistance = 10f;        // 音が完全に聞こえなくなる距離
+            // // audio.loop = true;              // ループ再生（必要に応じて）
+            // audio.Play();
+
+             // 破壊エフェクト
+            if (destroyEffect != null)
+            {
+                destroyEffect.transform.position = transform.position;
+                destroyEffect.Play();
+            }
             
             // 背景Cubeを表示 (最初は非アクティブにしておく)
             // if (backgroundCube != null)
@@ -370,8 +408,9 @@ namespace PolySpatial.Samples
             float startValue = targetMaterial.GetFloat("_ClipTime");
             float elapsed = 0f;
 
-            GameManager gameManagerSc = gameManager.GetComponent<GameManager>();
-            gameManagerSc.GameClear();
+            // GameManager gameManagerSc = gameManager.GetComponent<GameManager>();
+            // gameManagerSc.GameClear();
+            GameManager.Instance.GameClear();
 
             while (elapsed < duration)
             {
