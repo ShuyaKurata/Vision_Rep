@@ -15,9 +15,12 @@ namespace PolySpatial.Samples
         Transform m_PolySpatialCameraTransform;
 
         [SerializeField]
-float m_ShotForce = 10f; // 発射の強さ（適宜調整）
+float m_ShotForce = 20f; // 発射の強さ（適宜調整）
 
          public float rotateSpeed = 0.1f; // 毎秒90度回転（Z軸回転なら Vector3.forward）
+
+         [SerializeField]
+        private AudioSource audio;
 
 
 #if UNITY_INCLUDE_XR_HANDS
@@ -166,8 +169,19 @@ void TryDecopin()
                     Vector3 handForward = (palmPose.position - wristPose.position).normalized;
                     float dot = Vector3.Dot(velocity.normalized, handForward);
 
-                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f && elapsedTime > duration/4)
+                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f)
                     {
+
+                        
+                        // audio.clip = myClip;
+                        audio.spatialBlend = 1f;        // 空間オーディオっぽくする
+                        audio.minDistance = 1f;         // 音量が減衰し始める距離
+                        audio.maxDistance = 10f;        // 音が完全に聞こえなくなる距離
+                        audio.loop = false;             // ループ再生（必要に応じて）
+                        audio.PlayOneShot(audio.clip);
+
+
+
                         Rigidbody rb = null;
                         if (obj != null)
                         {

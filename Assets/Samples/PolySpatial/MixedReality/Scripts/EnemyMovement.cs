@@ -44,6 +44,8 @@ public class EnemyMovement : MonoBehaviour
     private TextMeshPro hpText; // ← TextMeshPro（3Dのやつ）を参照
      [SerializeField] 
     private Slider slider;
+     [SerializeField] 
+    private TextMeshPro hitAttention; // ← TextMeshPro（3Dのやつ）を参照
 
     [Header("ドロップ")]
      [SerializeField] 
@@ -57,6 +59,15 @@ public class EnemyMovement : MonoBehaviour
     private float attackTimer = 0f;
     private bool isDead = false;
     private bool isAttacking = false;
+    private bool isDamageMotioning = false;
+
+      [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
+    private AudioClip hitClip;
+    [SerializeField]
+    private AudioClip throughClip;
 
 
 
@@ -135,7 +146,7 @@ public class EnemyMovement : MonoBehaviour
             float distance = Vector3.Distance(a, b);
             // Debug.Log($"distance={distance}");
 
-            if(!isDead) {
+            if(!isDead && !isDamageMotioning) {
                 if (distance > m_StoppingDistance && !isAttacking)
                 {
                     
@@ -211,16 +222,37 @@ public class EnemyMovement : MonoBehaviour
         float distance = Vector3.Distance(transform.position, m_PlayerTransform.position);
         if (distance <= attackRange)
         {
+            PlayHitSound();
             Debug.Log("攻撃ヒット！プレイヤーにダメージを与える");
             GameManager.Instance.ReducePlayerHP(1); // GameManagerにダメージ処理を依頼
+        }else{
+            PlayThroughSound();
         }
          isAttacking = false;
         
     }
-
-    void StartAttackCallBack(){
+     void StartAttackCallBack(){
         isAttacking = true;
     }
+
+    void StartDamageCallBack(){
+        hitAttention.gameObject.SetActive(true); 
+         m_Agent.isStopped = true;
+        m_Agent.ResetPath();
+
+        isDamageMotioning = true;
+        animator.SetBool("isDamaged", isDamageMotioning);
+    }
+
+    void EndDamageCallBack()
+    {
+        hitAttention.gameObject.SetActive(false); 
+         isDamageMotioning = false;
+         animator.SetBool("isDamaged", isDamageMotioning);
+        
+    }
+
+   
 
     
 
@@ -261,6 +293,7 @@ public class EnemyMovement : MonoBehaviour
         {
             StartCoroutine(Die());
         }
+        StartDamageCallBack();
     }
 
     IEnumerator Die()
@@ -290,4 +323,13 @@ public class EnemyMovement : MonoBehaviour
 
         slider.value = (float)hp / (float)maxHp; ;
     }
+
+    public void PlayHitSound() {
+        audioSource.PlayOneShot(hitClip);
+    }
+
+    public void PlayThroughSound() {
+        audioSource.PlayOneShot(throughClip);
+    }
+
 }

@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
     private TextMeshPro playerHpText; // ← TextMeshPro（3Dのやつ）を参照
     [SerializeField]
     private GameObject returnButton;
+      [SerializeField] 
+    private Slider slider;
 
     public int playerHP = 5;
     public int maxPlayerHP = 5;
@@ -68,10 +70,13 @@ public class GameManager : MonoBehaviour
             // redScreenMaterial.SetFloat("_hp", playerHP+1);
             // redScreenMaterial.color = new Color(1f, 0f, 0f, 1f); // 赤、完全不透明
 
-            if (playerHpText != null)
-            {
-                playerHpText.text = $"HP: {playerHP}";
-            }
+            // if (playerHpText != null)
+            // {
+            //     playerHpText.text = $"HP: {playerHP}";
+            // }
+            
+
+            slider.value = (float)playerHP / (float)maxPlayerHP; ;
         }
     }
 
