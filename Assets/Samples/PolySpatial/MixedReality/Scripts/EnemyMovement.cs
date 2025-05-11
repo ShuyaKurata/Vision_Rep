@@ -14,7 +14,7 @@ public class EnemyMovement : MonoBehaviour
 {
     [Header("追跡設定")]
     [SerializeField]
-    Transform m_PlayerTransform; // インスペクターで追跡対象（プレイヤー、カメラなど）を設定する
+    public Transform m_PlayerTransform; // インスペクターで追跡対象（プレイヤー、カメラなど）を設定する
 
     [Header("NavMeshAgent 設定")]
     [SerializeField]
@@ -37,9 +37,9 @@ public class EnemyMovement : MonoBehaviour
 
     [Header("テキスト")]
     [SerializeField]
-    public int hp = 3;
+    private int hp = 3;
     [SerializeField]
-    public int maxHp = 3;
+    private int maxHp = 3;
     [SerializeField] 
     private TextMeshPro hpText; // ← TextMeshPro（3Dのやつ）を参照
      [SerializeField] 
@@ -68,6 +68,11 @@ public class EnemyMovement : MonoBehaviour
     private AudioClip hitClip;
     [SerializeField]
     private AudioClip throughClip;
+    [SerializeField]
+    private AudioClip voiceClip;
+
+    public Camera mainCamera; // Inspectorでアサイン可能にする
+    
 
 
 
@@ -76,6 +81,14 @@ public class EnemyMovement : MonoBehaviour
         m_Agent = GetComponent<NavMeshAgent>();
         m_Rigidbody = GetComponent<Rigidbody>();
 
+
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main; // 念のため自動取得
+        }
+        if(m_PlayerTransform == null){
+            m_PlayerTransform = mainCamera.transform;
+        }
         // Rigidbodyの設定 (Is Kinematic推奨)
         if (m_Rigidbody != null)
         {
@@ -287,6 +300,7 @@ public class EnemyMovement : MonoBehaviour
     {
         if (isDead) return;
 
+        audioSource.PlayOneShot(voiceClip);
         hp -= amount;
         UpdateHPText();
         if (hp <= 0)
@@ -320,8 +334,14 @@ public class EnemyMovement : MonoBehaviour
         {
             hpText.text = $"HP: {hp}";
         }
+        // slider.value = (float)hp / (float)maxHp;
+        // slider.minValue = 0;
+        // slider.maxValue = maxHp;
+        // slider.value = hp;
+        slider.value = 0.5f;
 
-        slider.value = (float)hp / (float)maxHp; ;
+        Debug.Log("slider hp"+hp+"maxhp"+ maxHp+"result"+(float)hp / (float)maxHp);
+        // slider.value = (float)hp / 3f; 
     }
 
     public void PlayHitSound() {

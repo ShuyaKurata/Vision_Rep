@@ -22,6 +22,9 @@ float m_ShotForce = 20f; // 発射の強さ（適宜調整）
          [SerializeField]
         private AudioSource audio;
 
+         [SerializeField]
+        private GameObject airEffect;
+
 
 #if UNITY_INCLUDE_XR_HANDS
         XRHandSubsystem m_HandSubsystem;
@@ -172,6 +175,7 @@ void TryDecopin()
                     if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f)
                     {
 
+                        Instantiate(airEffect, indexPos, Quaternion.identity);
                         
                         // audio.clip = myClip;
                         audio.spatialBlend = 1f;        // 空間オーディオっぽくする

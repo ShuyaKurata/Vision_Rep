@@ -866,6 +866,8 @@ MonoBehaviour:
   audioSource: {fileID: 4914807679888172974}
   hitClip: {fileID: 8300000, guid: 1c1fd9d8e0e87489681bfde1179a64f9, type: 3}
   throughClip: {fileID: 8300000, guid: 1718518300b1849ddb583b753e73ce55, type: 3}
+  voiceClip: {fileID: 8300000, guid: c8f642d342ccd441bb94ad70fa03fe05, type: 3}
+  mainCamera: {fileID: 0}
 --- !u!65 &6712523670386855242
 BoxCollider:
   m_ObjectHideFlags: 0
