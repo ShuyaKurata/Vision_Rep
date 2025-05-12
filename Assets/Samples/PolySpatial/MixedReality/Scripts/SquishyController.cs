@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class SquishyController : MonoBehaviour
@@ -5,75 +6,93 @@ public class SquishyController : MonoBehaviour
     [SerializeField] private float destroyDuration = 1.0f;
     [SerializeField] private ParticleSystem destroyEffect;
     [SerializeField] private AudioSource destroySound;
-    [SerializeField] private GameObject backgroundCube;
 
     private bool isDestroyed = false;
-
-    public void DestroySphere()
+    private float timer = 0f;
+    private float rotateSpeed = 0.3f;
+    private float riseSpeed = 0.2f;
+    public void DestroyItem()
     {
-        if (isDestroyed) return;
+        Debug.Log("i am destroyitem");
+        StartCoroutine(DestroyEffect());
+        GameManager.Instance.Recover();
+        
+    }
+
+    void Update()
+    {
+        
+
+                transform.position += Vector3.up * riseSpeed * Time.deltaTime;
+            transform.Rotate(Vector3.up * rotateSpeed * Time.deltaTime);
+
+        // タイマーを更新
+        timer += Time.deltaTime;
+        if (timer >= 7f)
+        {
+            StartCoroutine(DestroyAndFadeOut(gameObject,Color.white,Color.white));
+        }
+    }
+
+    IEnumerator DestroyEffect()
+    {
+        if (isDestroyed) yield break;
         isDestroyed = true;
 
-        // 破壊エフェクト
+        if (destroySound != null)
+        {
+            destroySound.PlayOneShot(destroySound.clip);
+        }
+
         if (destroyEffect != null)
         {
             destroyEffect.transform.position = transform.position;
             destroyEffect.Play();
         }
 
-        // サウンド
-        if (destroySound != null)
-        {
-            destroySound.Play();
-        }
-
-        // 背景Cubeを表示 (最初は非アクティブにしておく)
-        if (backgroundCube != null)
-        {
-            backgroundCube.SetActive(true);
-            backgroundCube.transform.localScale = Vector3.zero;
-            StartCoroutine(ExpandCube(backgroundCube));
-        }
-
-        // Sphereのフェードアウトと破壊
-        StartCoroutine(DestroyAndFadeOut(gameObject));
+        yield return StartCoroutine(DestroyAndFadeOut(gameObject,Color.white,new Color(250/255, 1, 0, 1)));
     }
 
-    private System.Collections.IEnumerator DestroyAndFadeOut(GameObject sphereObject)
+    // private IEnumerator DestroyAndFadeOut(GameObject sphereObject)
+    // {
+    //     Renderer rend = sphereObject.GetComponent<Renderer>();
+    //     Material mat = rend.material;
+    //     Vector3 originalScale = sphereObject.transform.localScale;
+    //     float elapsed = 0f;
+
+    //     while (elapsed < destroyDuration)
+    //     {
+    //         float t = elapsed / destroyDuration;
+    //         rend.material.SetFloat("_GripAmount", t);
+    //         elapsed += Time.deltaTime;
+    //         yield return null;
+    //     }
+
+    //     Destroy(sphereObject);
+    // }
+    private IEnumerator DestroyAndFadeOut(
+        GameObject sphereObject,
+        Color startColor,
+        Color endColor)
     {
         Renderer rend = sphereObject.GetComponent<Renderer>();
         Material mat = rend.material;
-        Vector3 originalScale = sphereObject.transform.localScale;
         float elapsed = 0f;
 
         while (elapsed < destroyDuration)
         {
             float t = elapsed / destroyDuration;
-            sphereObject.transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, t);
-            Color color = mat.color;
-            color.a = Mathf.Lerp(1f, 0f, t);
-            mat.color = color;
+            mat.SetFloat("_GripAmount", t);
+            Color currentColor = Color.Lerp(startColor, endColor, t);
+            mat.SetColor("_GreenAmount", currentColor);
             elapsed += Time.deltaTime;
             yield return null;
         }
+        mat.SetColor("_GreenAmount", endColor);
 
-        Destroy(sphereObject); // 完全に削除！
+
+        Destroy(sphereObject);
     }
 
-    private System.Collections.IEnumerator ExpandCube(GameObject cube)
-    {
-        Vector3 targetScale = Vector3.one;
-        float duration = 1f;
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            float t = elapsed / duration;
-            cube.transform.localScale = Vector3.Lerp(Vector3.zero, targetScale, Mathf.SmoothStep(0, 1, t));
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
-
-        cube.transform.localScale = targetScale;
-    }
 }
+

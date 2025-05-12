@@ -55,7 +55,7 @@ bool m_HasPreviousIndexPos = false;
          private bool objCreated = false;
         private GameObject obj;
         float duration = 2.0f; // スケーリングにかける時間（秒）
-        Vector3 startScale = Vector3.zero;
+        Vector3 startScale = Vector3.one * 0.04f;
         Vector3 targetScale = Vector3.one * 0.2f;
         float elapsedTime = 0f;
 
@@ -172,7 +172,7 @@ void TryDecopin()
                     Vector3 handForward = (palmPose.position - wristPose.position).normalized;
                     float dot = Vector3.Dot(velocity.normalized, handForward);
 
-                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f)
+                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f && elapsedTime >= duration/8)
                     {
 
                         Instantiate(airEffect, indexPos, Quaternion.identity);
@@ -183,6 +183,7 @@ void TryDecopin()
                         audio.maxDistance = 10f;        // 音が完全に聞こえなくなる距離
                         audio.loop = false;             // ループ再生（必要に応じて）
                         audio.PlayOneShot(audio.clip);
+                        Debug.Log("Fired!");
 
 
 
@@ -231,9 +232,9 @@ bool IsFingerExtended(XRHand hand, XRHandJointID tipID, XRHandJointID metacarpal
         Vector3 fingerDirection = (tipPose.position - metacarpalPose.position).normalized;
         Vector3 handForward = (palmPose.position - wristPose.position).normalized;
 
-        Debug.Log("tin");
-        Debug.Log(fingerDirection);
-        Debug.Log(handForward);
+        // Debug.Log("tin");
+        // Debug.Log(fingerDirection);
+        // Debug.Log(handForward);
 
         return Vector3.Dot(fingerDirection, handForward) > 0.9f;
     }

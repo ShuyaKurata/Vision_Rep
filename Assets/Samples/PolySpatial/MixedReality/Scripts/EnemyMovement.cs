@@ -70,14 +70,31 @@ public class EnemyMovement : MonoBehaviour
     private AudioClip throughClip;
     [SerializeField]
     private AudioClip voiceClip;
+    [SerializeField]
+    private AudioClip walkClip;
 
     public Camera mainCamera; // Inspectorでアサイン可能にする
     
+     private int instanceId;
+     private float _value;
+
+    public void Initialize(int id)
+    {
+        instanceId = id;
+        
+    }
+    public void RequestDestruction()
+    {
+        // GameManager.Instance.DestroyEnemy(instanceId);
+        StartCoroutine(GameManager.Instance.DestroyEnemy(instanceId));
+
+    }
 
 
 
     void Awake()
     {
+        audioSource.PlayOneShot(walkClip);
         m_Agent = GetComponent<NavMeshAgent>();
         m_Rigidbody = GetComponent<Rigidbody>();
 
@@ -265,6 +282,12 @@ public class EnemyMovement : MonoBehaviour
         
     }
 
+    void MovingCallBack()
+    {
+        audioSource.PlayOneShot(walkClip);
+        
+    }
+
    
 
     
@@ -305,12 +328,13 @@ public class EnemyMovement : MonoBehaviour
         UpdateHPText();
         if (hp <= 0)
         {
-            StartCoroutine(Die());
+            // StartCoroutine(Die());
+            Die();
         }
         StartDamageCallBack();
     }
 
-    IEnumerator Die()
+    private void Die()
     {
         isDead = true;
         m_Agent.isStopped = true; // NavMesh止める
@@ -322,10 +346,9 @@ public class EnemyMovement : MonoBehaviour
         Instantiate(dropItem, transform.position, transform.rotation);
 
 
-        // 死亡モーションの長さだけ待ってから削除
-        yield return new WaitForSeconds(3f); // 3秒くらい待つ、ここはアニメの長さ次第で調整
-
-        Destroy(gameObject);
+        
+        // Destroy(gameObject);
+        RequestDestruction();
     }
 
     private void UpdateHPText()
@@ -334,14 +357,28 @@ public class EnemyMovement : MonoBehaviour
         {
             hpText.text = $"HP: {hp}";
         }
-        // slider.value = (float)hp / (float)maxHp;
+        if(slider != null){
+        
+        if (maxHp > 0)
+        {
+            _value = Mathf.Clamp01((float)hp / (float)maxHp);
+        }
+        else
+        {
+            Debug.LogWarning("maxHpが0以下です。スライダー更新をスキップします。");
+            return; // もしくは _value = 0 にしておく
+        }
+        slider.value = _value;
         // slider.minValue = 0;
         // slider.maxValue = maxHp;
         // slider.value = hp;
-        slider.value = 0.5f;
+        // slider.value = 0.5f;
 
         Debug.Log("slider hp"+hp+"maxhp"+ maxHp+"result"+(float)hp / (float)maxHp);
+        Debug.Log("value"+ slider.value);
+        Debug.Log("max"+ slider.maxValue);
         // slider.value = (float)hp / 3f; 
+        }
     }
 
     public void PlayHitSound() {

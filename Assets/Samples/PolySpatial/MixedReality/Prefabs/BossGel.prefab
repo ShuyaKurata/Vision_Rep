@@ -13,10 +13,9 @@ GameObject:
   - component: {fileID: 7336423822014421671}
   - component: {fileID: 3401448053734151201}
   - component: {fileID: 5819795135558000458}
-  - component: {fileID: 3851229572434724943}
   m_Layer: 0
   m_Name: BossGel
-  m_TagString: Untagged
+  m_TagString: DropItem
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -123,26 +122,3 @@ MonoBehaviour:
   destroyEffect: {fileID: 3514513916864004247, guid: 2cb79cb786a1947149bcc2ec5598cfea,
     type: 3}
   destroySound: {fileID: 0}
-  backgroundCube: {fileID: 0}
---- !u!114 &3851229572434724943
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6233446999662516412}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72310e0c947394e388a1424e5df05b29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 6233446999662516412}
-  targetMaterial: {fileID: 0}
-  duration: 2
-  gameManager: {fileID: 0}
-  riseSpeed: 0.5
-  riseDistance: 1
-  rotateSpeed: 90
-  destroyEffect: {fileID: 3514513916864004247, guid: 2cb79cb786a1947149bcc2ec5598cfea,
-    type: 3}
-  myClip: {fileID: 8300000, guid: 95f2b14ad651e454c9d37b2a8b87c1b3, type: 3}

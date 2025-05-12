@@ -7,6 +7,7 @@ public class GreenSphere : MonoBehaviour
      [SerializeField]
     string m_DestructionObjectTag = "Enemy"; // 衝突時に破壊されるオブジェクトのタグ
     public bool Fired = false;
+    string m_DropItemTag = "DropItem";
 
     
     // Start is called before the first frame update
@@ -36,6 +37,16 @@ void OnCollisionEnter(Collision collision)
                 target.TakeDamage(1); // BのHPを1減らす
             }
 
+        }
+        if (!string.IsNullOrEmpty(m_DropItemTag) && collision.gameObject.CompareTag(m_DropItemTag))
+        {
+            SquishyController target = collision.gameObject.GetComponent<SquishyController>();
+
+            if (target != null)
+            {
+                target.DestroyItem(); 
+
+            }
         }
             Destroy(this.gameObject); // 自分（A）を破壊
     }

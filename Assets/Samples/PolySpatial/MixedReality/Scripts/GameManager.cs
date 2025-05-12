@@ -22,12 +22,32 @@ public class GameManager : MonoBehaviour
 
     public float spawnDistance = 2f;
 
-    public int playerHP = 5;
-    public int maxPlayerHP = 5;
+    public float playerHP = 5f;
+    public float maxPlayerHP = 5f;
 
     private float fadeDuration = 1f;
     private float displayDuration = 2f;
     private float typingSpeed = 0.2f;
+
+     [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
+    private AudioClip alertClip;
+    [SerializeField]
+    private AudioClip startClip;
+    [SerializeField]
+    private AudioClip clearClip;
+
+    Dictionary<int, GameObject> enemyInstances = new Dictionary<int, GameObject>();
+    private int killCount = 0;
+    private int clearCondition = 7;
+    public Material backgroundMaterial; // 対象のマテリアル
+
+     public Image[] heartImages;
+    public Sprite fullHeartSprite;
+    public Sprite halfHeartSprite;
+    public Sprite emptyHeartSprite;
 
     void Awake()
     {
@@ -50,13 +70,23 @@ public class GameManager : MonoBehaviour
             blackScreenMaterial.renderQueue = 9999; // 通常透明オブジェクトは 3000
 
         }
+        if( backgroundMaterial != null)
+            backgroundMaterial.SetFloat("_ClipTime", 1f);
+
+         UpdateHearts();
         StartCoroutine(GameFlow());
+
+    }
+    void Update()
+    {
+        
     }
 
     IEnumerator GameFlow()
     {
         Transform cam = Camera.main.transform;
 
+        audioSource.PlayOneShot(startClip);
         yield return new WaitForSeconds(2f);
         // playerHpText.text = "モンスターの気配がする";
         // // playerHpText.text = "monster is coming";
@@ -66,7 +96,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ShowMessages());
 
         // 一体目：正面
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(6.5f);
         SpawnMonster(cam.position + cam.forward * spawnDistance);
 
         // 二体目・三体目：右斜め・左斜め
@@ -99,6 +129,7 @@ public class GameManager : MonoBehaviour
 
         // メッセージ表示
         playerHpText.text = "モンスターの気配がする";
+        
         // フェードイン
         yield return StartCoroutine(FadeText(playerHpText, 0f, 1f, fadeDuration));
 
@@ -178,9 +209,22 @@ public class GameManager : MonoBehaviour
             //     playerHpText.text = $"HP: {playerHP}";
             // }
             
-
+            if(slider != null)
             slider.value = (float)playerHP / (float)maxPlayerHP; ;
+            if (playerHP <= 2)
+            {
+                if (!audioSource.isPlaying)
+                {
+                    audioSource.clip = alertClip;
+                    audioSource.volume = 0.4f;
+                    audioSource.loop = true;
+                    audioSource.Play();
+                }
+            }
+            
+
         }
+        UpdateHearts();
     }
 
     // public IEnumerator FadeInOut(Material mat, string property, float durationPerPhase)
@@ -257,17 +301,66 @@ public class GameManager : MonoBehaviour
         
     }
 
-    public void GameClear(){
-        Debug.Log("clera");
-        if(redScreen != null){
-        redScreen.SetActive(false);
+    public void GameClear()
+    {
+        audioSource.Stop();
+        // クリア時のサウンドを再生
+        if (clearClip != null)
+        {
+            audioSource.volume = 1f;
+            audioSource.PlayOneShot(clearClip);
+
+        }else{
+            Debug.Log("clearsound is not defined??");
         }
-         if(playerHpText != null){
-        playerHpText.text = "THANK YOU!";
-        }
-        returnButton.SetActive(true);
+        // スローモーションを適用
+        Time.timeScale = 0.1f;
+
+        // 秒後にTime.timeScaleを元に戻すコルーチンを開始
+        StartCoroutine(RestoreTimeScaleAfterDelay(3f));
+
         
+         // 赤いスクリーンを非表示にする
+        if (redScreen != null)
+        {
+            redScreen.SetActive(false);
+        }
+
+        // プレイヤーのHPテキストを更新
+        if (playerHpText != null)
+        {
+            playerHpText.text = "YOU WIN!";
+        }
+
+        // フェード処理を開始
+        StartCoroutine(FadeClipTime());
+
+        Debug.Log("clear");
+
+       
+             // プレイヤーのHPテキストを更新
+        if (playerHpText != null)
+        {
+            playerHpText.text = "THANK YOU";
+        }
+
+        // リターンボタンを表示
+        if (returnButton != null)
+        {
+            returnButton.SetActive(true);
+        }
     }
+
+    // Time.timeScaleを元に戻すコルーチン
+    private IEnumerator RestoreTimeScaleAfterDelay(float delay)
+    {
+        // Time.timeScaleの影響を受けない待機
+        yield return new WaitForSecondsRealtime(delay);
+
+        // Time.timeScaleを元に戻す
+        Time.timeScale = 1f;
+    }
+
 
     public void GameOver()
     {
@@ -291,14 +384,101 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1f); // 1秒待つ
         SceneManager.LoadScene("ProjectLauncher");
     }
-    void SpawnMonster(Vector3 position)
+    // void SpawnMonster(Vector3 position)
+    // {
+    //     GameObject monster = Instantiate(monsterPrefab, position, Quaternion.identity);
+    //     var movement = monster.GetComponent<EnemyMovement>();
+    //     if (movement != null)
+    //     {
+    //         movement.mainCamera = Camera.main;
+    //         movement.m_PlayerTransform = Camera.main.transform;
+    //     }
+    // }
+
+
+    public void SpawnMonster(Vector3 pos)
     {
-        GameObject monster = Instantiate(monsterPrefab, position, Quaternion.identity);
-        var movement = monster.GetComponent<EnemyMovement>();
-        if (movement != null)
+        GameObject obj = Instantiate(monsterPrefab, pos, Quaternion.identity);
+        int id = obj.GetInstanceID();
+        enemyInstances.Add(id, obj);
+
+        var enemy = obj.GetComponent<EnemyMovement>();
+        enemy.Initialize(id);
+    }
+
+    public IEnumerator DestroyEnemy(int id)
+    {
+        killCount++;
+        playerHpText.text = "あと" + (clearCondition - killCount) + "体です";
+
+        if(killCount >= clearCondition){
+            GameClear();
+        }
+        
+        if (enemyInstances.ContainsKey(id))
         {
-            movement.mainCamera = Camera.main;
-            movement.m_PlayerTransform = Camera.main.transform;
+            // 死亡モーションの長さだけ待ってから削除
+            yield return new WaitForSeconds(3f);
+            Destroy(enemyInstances[id]);
+            enemyInstances.Remove(id);
+        }
+    }
+
+
+   
+
+        private IEnumerator FadeClipTime()
+        {
+            
+
+            float startValue = backgroundMaterial.GetFloat("_ClipTime");
+            float elapsed = 0f;
+            float duration = 2f;
+
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float newValue = Mathf.Lerp(startValue, 0f, elapsed / duration);
+                backgroundMaterial.SetFloat("_ClipTime", newValue);
+                yield return null;
+            }
+
+            backgroundMaterial.SetFloat("_ClipTime", 0f);
+            yield return new WaitForSeconds(3f); 
+            // Destroy(gameObject); // オブジェクトを削除
+        }
+    public void Recover(){
+        if(playerHP <= maxPlayerHP - 0.5)
+        playerHP += 0.5f;
+         if(slider != null)
+        slider.value = (float)playerHP / (float)maxPlayerHP; 
+        if(playerHP >= 3)
+            {
+                // HPが回復したらアラートを止める
+                if (audioSource.isPlaying && audioSource.clip == alertClip)
+                {
+                    audioSource.Stop();
+                    audioSource.loop = false;
+                }
+            }
+        UpdateHearts();
+    }
+    public void UpdateHearts()
+    {
+        for (int i = 0; i < heartImages.Length; i++)
+        {
+            if (i < playerHP)
+            {
+                if (playerHP - i >= 1)
+                    heartImages[i].sprite = fullHeartSprite;
+                else
+                    heartImages[i].sprite = halfHeartSprite;
+            }
+            else
+            {
+                heartImages[i].sprite = emptyHeartSprite;
+            }
         }
     }
 
