@@ -172,7 +172,7 @@ void TryDecopin()
                     Vector3 handForward = (palmPose.position - wristPose.position).normalized;
                     float dot = Vector3.Dot(velocity.normalized, handForward);
 
-                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f && elapsedTime >= duration/8)
+                    if (speed > k_SpeedThreshold && dot > k_DirectionThreshold && velocity.sqrMagnitude > 0.1f && elapsedTime >= duration/10)
                     {
 
                         Instantiate(airEffect, indexPos, Quaternion.identity);
@@ -236,7 +236,7 @@ bool IsFingerExtended(XRHand hand, XRHandJointID tipID, XRHandJointID metacarpal
         // Debug.Log(fingerDirection);
         // Debug.Log(handForward);
 
-        return Vector3.Dot(fingerDirection, handForward) > 0.9f;
+        return Vector3.Dot(fingerDirection, handForward) > 0.7f;
     }
 
     return false;
