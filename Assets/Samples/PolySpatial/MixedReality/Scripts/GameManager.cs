@@ -49,8 +49,11 @@ public class GameManager : MonoBehaviour
     public Sprite halfHeartSprite;
     public Sprite emptyHeartSprite;
 
+    private float startTime;
+
     void Awake()
     {
+        startTime = Time.time;
         Instance = this;
         if (redScreen != null)
         {
@@ -303,6 +306,7 @@ public class GameManager : MonoBehaviour
 
     public void GameClear()
     {
+
         audioSource.Stop();
         // クリア時のサウンドを再生
         if (clearClip != null)
@@ -337,11 +341,13 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("clear");
 
-       
+        float clearTime = Time.time - startTime;
+        Debug.Log("経過時間: " + clearTime + "秒");
              // プレイヤーのHPテキストを更新
         if (playerHpText != null)
         {
-            playerHpText.text = "THANK YOU";
+            playerHpText.text = $"<align=\"center\">THANK YOU\n{clearTime:F2}秒</align>";
+
         }
 
         // リターンボタンを表示
