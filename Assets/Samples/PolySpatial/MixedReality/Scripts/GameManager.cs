@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
     Dictionary<int, GameObject> enemyInstances = new Dictionary<int, GameObject>();
     private int killCount = 0;
-    private int clearCondition = 7;
+    private int clearCondition = 5;
     public Material backgroundMaterial; // 対象のマテリアル
 
      public Image[] heartImages;
@@ -113,8 +113,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(5f);
         Vector3[] directions = new Vector3[]
         {
-            cam.forward,                  // 前
-            -cam.forward,                // 後
+            // cam.forward,                  // 前
+            // -cam.forward,                // 後
             cam.right,                   // 右
             -cam.right                   // 左
         };
