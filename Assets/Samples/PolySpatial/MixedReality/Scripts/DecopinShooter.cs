@@ -55,8 +55,8 @@ bool m_HasPreviousIndexPos = false;
          private bool objCreated = false;
         private GameObject obj;
         float duration = 2.0f; // スケーリングにかける時間（秒）
-        Vector3 startScale = Vector3.one * 0.04f;
-        Vector3 targetScale = Vector3.one * 0.2f;
+        Vector3 startScale = Vector3.one * 0.2f;
+        Vector3 targetScale = Vector3.one * 0.4f;
         float elapsedTime = 0f;
 
         void Start()
